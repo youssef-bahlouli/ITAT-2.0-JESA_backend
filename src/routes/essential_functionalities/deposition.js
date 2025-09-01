@@ -121,21 +121,10 @@ const mergeJson = (json1, json2) => {
 
 router.get("/deposition", requireSession, async (req, res) => {
   try {
-    console.info("get depositions Route");
-    console.info("get depositions Route");
-    console.info("get depositions Route");
-    console.info("get depositions Route");
-    console.info("get depositions Route");
-    console.info("get depositions Route");
-    console.info("get depositions Route");
-    console.info("get depositions Route");
-    console.info("get depositions Route");
-
-    console.log("req.user : ", req.user);
-
+    //console.log("req.user : ", req.user);
     //console.warn("IDDDDDD :" + "ObjectId('" + user._id + "')");
     const depositions = await Deposition.find({ user: req.user._id });
-    console.log(depositions);
+    //console.log(depositions);
     //const userPreferences = await UserPreferences.findOne({ user: user._id });
     const history = await get_input_history(req.user._id);
     const response = {
@@ -151,11 +140,6 @@ router.get("/deposition", requireSession, async (req, res) => {
   }
 });
 router.post("/deposition/insert", requireSession, async (req, res) => {
-  console.log("PAtch userPreferences");
-  console.log("PAtch userPreferences");
-  console.log("PAtch userPreferences");
-  console.log("PAtch userPreferences");
-  console.log("req.user" + req.user._id);
   //Preparing the preferences to input them in the database
   let data = JSON.parse(req.headers.data);
   console.log(data);
@@ -182,7 +166,7 @@ router.post("/deposition/insert", requireSession, async (req, res) => {
   if (data["serialNumber"] !== "")
     deposition.serialNumber = data["serialNumber"];
   await deposition.save("");
-  return res.status(201).json(data);
+  return res.status(201).json(deposition);
 });
 
 router.get("/deposition/search", requireSession, async (req, res) => {
@@ -250,4 +234,31 @@ router.get("/deposition/search", requireSession, async (req, res) => {
   }
 });
 
+router.get("/deposition/delete/part", requireSession, async (req, res) => {
+  try {
+    console.log("run");
+    console.log("run");
+    console.log("run");
+    console.log("run");
+    console.log("run");
+    console.log("run");
+    console.log("run");
+    const array = JSON.parse(req.headers.depositions);
+    for (let i in array) {
+      await Deposition.deleteOne({
+        inventoryString: { $regex: array[i], $options: "i" },
+      });
+    }
+    //et array = JSON.parse(req.headers.depositions);
+    //let model = array["model"];
+
+    res.json({
+      status: "success",
+      message: "Depositions deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: "Server error\n" + error });
+  }
+});
 export default router;
