@@ -187,15 +187,15 @@ router.post("/deposition/insert", requireSession, async (req, res) => {
 
 router.get("/deposition/search", requireSession, async (req, res) => {
   try {
-    console.info("get depositions Search");
-    console.info("get depositions Search");
-    console.info("get depositions Search");
-    console.info("get depositions Search");
-    console.info("get depositions Search");
-    console.info("get depositions Search");
-    console.info("get depositions Search");
-
-    console.log("req.user : ", req.user);
+    //console.info("get depositions Search");
+    //console.info("get depositions Search");
+    //console.info("get depositions Search");
+    //console.info("get depositions Search");
+    //console.info("get depositions Search");
+    //console.info("get depositions Search");
+    //console.info("get depositions Search");
+    //
+    //console.log("req.user : ", req.user);
     //const user = await User.findOne({ email: req.user.email });
     //if (!user) {
     //  return res.status(404).json({ error: "User not found" });
@@ -234,7 +234,7 @@ router.get("/deposition/search", requireSession, async (req, res) => {
 
     const results = await Deposition.find(query).sort(sortOption);
 
-    console.log(results);
+    //console.log(results);
     //const userPreferences = await UserPreferences.findOne({ user: user._id });
     //const history = await get_input_history(user._id);
     const response = {

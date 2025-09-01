@@ -14,10 +14,8 @@ const generateToken = (userId) => {
 
 async function requireSession(req, res, next) {
   try {
-    //console.log("sssss");
-    //console.log(session.user);
     const query = String(req.headers.query);
-    console.log("headerss\n\n====== : ", req.headers + "\n=====");
+    //console.log("headerss\n\n====== : ", req.headers + "\n=====");
     const sessions = await Session.find({
       "session.user.email": { $regex: String(query), $options: "i" },
       expires: { $gte: new Date() },
@@ -25,26 +23,6 @@ async function requireSession(req, res, next) {
     console.log("sessions : ", sessions);
 
     const latestSession = sessions[0];
-    console.log("latestSession : ");
-    console.log("latestSession : ", latestSession);
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-    console.log("between data =");
-
-    console.log("latestSession.session : ", latestSession);
 
     //if (sessions.length <= 0) {
     //  console.warn("No active session found for query:", query);
@@ -56,14 +34,14 @@ async function requireSession(req, res, next) {
     try {
       //const sessionData = JSON.parse(latestSession.session);
       if (latestSession.session.user?.email) {
-        console.log(
-          "middleware result of session data : ",
-          latestSession.session.user?.email
-        );
-        console.log(
-          "middleware result of session data : ",
-          latestSession.session.user?.fullname
-        );
+        //console.log(
+        //  "middleware result of session data : ",
+        //  latestSession.session.user?.email
+        //);
+        //console.log(
+        //  "middleware result of session data : ",
+        //  latestSession.session.user?.fullname
+        //);
         req.user = {
           _id: latestSession.session.user?._id,
 
@@ -71,7 +49,7 @@ async function requireSession(req, res, next) {
           fullname: String(latestSession.session.user?.fullname),
         };
 
-        console.warn(" before setting the req.body.user");
+        //console.warn(" before setting the req.body.user");
 
         next();
       } else {
