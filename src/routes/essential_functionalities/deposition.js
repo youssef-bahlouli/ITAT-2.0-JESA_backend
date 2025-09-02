@@ -147,12 +147,25 @@ router.post("/deposition/insert", requireSession, async (req, res) => {
   let type = data["type"];
   let inventoryName = data["inventoryName"];
   const user = new User({ email: req.user.email });
-  const deposition = new Deposition({
-    model: model,
-    type: type,
-    inventoryName: inventoryName,
-    user: req.user._id,
-  });
+  let deposition;
+  if (type === "movement") {
+    let to = data["to"];
+    deposition = new Deposition({
+      model: model,
+      type: type,
+      inventoryName: inventoryName,
+      user: req.user._id,
+      to: to,
+    });
+  } else {
+    deposition = new Deposition({
+      model: model,
+      type: type,
+      inventoryName: inventoryName,
+      user: req.user._id,
+    });
+  }
+
   console.warn("db user : ", user);
   if (data["quantity"] !== "") {
     console.log("quantity here");
@@ -166,7 +179,7 @@ router.post("/deposition/insert", requireSession, async (req, res) => {
   if (data["serialNumber"] !== "")
     deposition.serialNumber = data["serialNumber"];
   await deposition.save("");
-  return res.status(201).json(deposition);
+  return res.status(201).json({ deposition: deposition, success: true });
 });
 
 router.get("/deposition/search", requireSession, async (req, res) => {
@@ -234,7 +247,7 @@ router.get("/deposition/search", requireSession, async (req, res) => {
   }
 });
 
-router.get("/deposition/delete/part", requireSession, async (req, res) => {
+router.post("/deposition/delete/part", requireSession, async (req, res) => {
   try {
     console.log("run");
     console.log("run");
@@ -243,6 +256,9 @@ router.get("/deposition/delete/part", requireSession, async (req, res) => {
     console.log("run");
     console.log("run");
     console.log("run");
+    console.warn(req.headers.depositions);
+    console.warn(req.headers.depo);
+
     const array = JSON.parse(req.headers.depositions);
     for (let i in array) {
       await Deposition.deleteOne({
