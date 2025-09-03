@@ -27,7 +27,7 @@ DepositionSchema.pre("save", async function (next) {
         if (this.serialNumber) criteria = "SN";
       }
       this.inventoryString = await generateDepositionNumber(
-        this.constructor,
+        this._id,
         this.type,
         criteria
       ); // use model context
@@ -45,9 +45,15 @@ DepositionSchema.methods.comparePassword = async function (enteredPassword) {
 };
 
 //auto ID
-async function generateDepositionNumber(DepositionModel, type, criteria) {
-  const count = await DepositionModel.countDocuments();
-  const nextNumber = count + 1;
+async function generateDepositionNumber(id, type, criteria) {
+  //const count = await DepositionModel.countDocuments();
+  const buffer =
+    id instanceof mongoose.Types.ObjectId
+      ? id.id
+      : new mongoose.Types.ObjectId(id).id;
+
+  const counterHex = buffer.slice(9, 12).toString("hex");
+  const counter = parseInt(counterHex, 16); // full 3-byte counter
   const pre = type.slice(0, 3);
   let string = pre.toUpperCase() + "-";
   if (pre === "inv" || pre === "INV") {
@@ -63,7 +69,7 @@ async function generateDepositionNumber(DepositionModel, type, criteria) {
     String(now.getMinutes()).padStart(2, "0");
 
   console.log(today); // e.g., "2025-08-19"
-  string += nextNumber.toString().padStart(9, "0") + "-" + today;
+  string += counter.toString().padStart(9, "0") + "-" + today;
   //if(type==="movment")
   return string;
 }

@@ -3,9 +3,6 @@ import jwt from "jsonwebtoken";
 import User, { get_generatedUserNumber } from "./../../models/User.js"; // Adjust the path according to your project structure
 import UserPreferences from "./../../models/UserPreferences.js"; // Adjust the path according to your project structure
 import { requireSession } from "../middleware/session.js";
-import Session from "../../models/Session.js";
-import session from "express-session";
-import userPreferences from "./../../models/UserPreferences.js";
 import Deposition from "../../models/Deposition.js";
 import mongoose from "mongoose";
 //ObjectId("6899bbc08b88592d822f6f2b");
@@ -146,9 +143,12 @@ router.post("/deposition/insert", requireSession, async (req, res) => {
   let model = data["model"];
   let type = data["type"];
   let inventoryName = data["inventoryName"];
-  const user = new User({ email: req.user.email });
+  const user = await User.findOne({ email: req.user.email });
+
   let deposition;
   if (type === "movement") {
+    let sn = data.serialNumber;
+    //deposition.serialNumber = data["serialNumber"];
     let to = data["to"];
     deposition = new Deposition({
       model: model,
@@ -156,6 +156,7 @@ router.post("/deposition/insert", requireSession, async (req, res) => {
       inventoryName: inventoryName,
       user: req.user._id,
       to: to,
+      serialNumber: sn,
     });
   } else {
     deposition = new Deposition({
@@ -179,45 +180,29 @@ router.post("/deposition/insert", requireSession, async (req, res) => {
   if (data["serialNumber"] !== "")
     deposition.serialNumber = data["serialNumber"];
   await deposition.save("");
+  console.log(deposition);
   return res.status(201).json({ deposition: deposition, success: true });
 });
 
 router.get("/deposition/search", requireSession, async (req, res) => {
   try {
-    //console.info("get depositions Search");
-    //console.info("get depositions Search");
-    //console.info("get depositions Search");
-    //console.info("get depositions Search");
-    //console.info("get depositions Search");
-    //console.info("get depositions Search");
-    //console.info("get depositions Search");
-    //
-    //console.log("req.user : ", req.user);
-    //const user = await User.findOne({ email: req.user.email });
-    //if (!user) {
-    //  return res.status(404).json({ error: "User not found" });
-    //}
-    //console.warn("IDDDDDD :" + "ObjectId('" + user._id + "')");
+    const filterObj = JSON.parse(req.headers.filter || "{}");
+    const searchTerm = req.headers.data || "";
+    const searchRegex = new RegExp(searchTerm, "i");
 
-    const searchTerm = req.headers.data;
-    const filter = req.headers.filter;
-    //const searchTerm = "tilab"; // Can be string, number-like, or date-like
-    const searchRegex = new RegExp(searchTerm, "i"); // case-insensitive
+    const order = filterObj.order === "old_to_new" ? 1 : -1;
 
     const buildSearchConditions = () => {
       const conditions = [
+        { inventoryString: { $regex: searchRegex } },
         { model: { $regex: searchRegex } },
         { inventoryName: { $regex: searchRegex } },
-        { inventoryString: { $regex: searchRegex } },
+        { serialNumber: { $regex: searchRegex } },
         { type: { $regex: searchRegex } },
       ];
 
       if (!isNaN(Number(searchTerm))) {
         conditions.push({ quantity: Number(searchTerm) });
-      }
-
-      if (searchTerm.match(/^[0-9a-fA-F]{24}$/)) {
-        conditions.push({ _id: searchTerm }); // or another field
       }
 
       return conditions;
@@ -227,22 +212,17 @@ router.get("/deposition/search", requireSession, async (req, res) => {
       user: req.user._id,
       $or: buildSearchConditions(),
     };
-    const sortOption = filter === "new_to_old" ? { createdAt: -1 } : {};
+
+    const sortOption = { createdAt: order };
 
     const results = await Deposition.find(query).sort(sortOption);
-
-    //console.log(results);
-    //const userPreferences = await UserPreferences.findOne({ user: user._id });
-    //const history = await get_input_history(user._id);
-    const response = {
+    console.log(results);
+    res.json({
       all_results: results.length,
       depositions: results,
-      //history: history,
-    };
-
-    res.json(response);
+    });
   } catch (error) {
-    console.error("Error fetching user:", error);
+    console.error("Error fetching depositions:", error);
     res.status(500).json({ error: "Server error" });
   }
 });

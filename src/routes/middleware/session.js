@@ -20,7 +20,7 @@ async function requireSession(req, res, next) {
       "session.user.email": { $regex: String(query), $options: "i" },
       expires: { $gte: new Date() },
     });
-    console.log("sessions : ", sessions);
+    //console.log("sessions : ", sessions);
 
     const latestSession = sessions[0];
 
@@ -29,7 +29,7 @@ async function requireSession(req, res, next) {
     //  return res.status(401).json({ error: "Session not found or expired" });
     //}
 
-    console.log("begin :");
+    //console.log("begin :");
 
     try {
       //const sessionData = JSON.parse(latestSession.session);
